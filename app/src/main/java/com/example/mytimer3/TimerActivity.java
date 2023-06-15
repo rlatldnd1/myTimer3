@@ -1,6 +1,7 @@
 package com.example.mytimer3;
 
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.os.Bundle;
 import android.os.Handler;
 import android.view.View;
@@ -8,6 +9,9 @@ import android.widget.Button;
 import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
+
+import com.google.gson.Gson;
+import com.google.gson.GsonBuilder;
 
 public class TimerActivity extends AppCompatActivity {
     private TextView timerTextView;
@@ -26,6 +30,10 @@ public class TimerActivity extends AppCompatActivity {
     private String username;
     private String password;
     private long cumulativeTime;
+
+    private static int[] studyTime = {0, 5600, 12500, 21900, 58400, 999999};
+    private static int[] futureSalary = {0, 2831, 3471, 5434, 23070, 999999};
+    private static String[] futureJob = {"백수", "9급 공무원", "7급 공무원", "5급 공무원", "의사"};
 
 
     @Override
@@ -141,10 +149,33 @@ public class TimerActivity extends AppCompatActivity {
         timerTextView.setText(timeFormatted);
     }
     private void updateMoneyTextView(long time) {
-        long money = cumulativeTime + time;
-        String moneyFormatted = String.valueOf(money) + "원";
+
+        SharedPreferences preference = getSharedPreferences("UserInfo", MODE_PRIVATE);
+        Gson gson = new GsonBuilder().create();
+        SharedPreferences.Editor editor = preference.edit();
+
+        String jsonUser = preference.getString(username, null);
+        User user = gson.fromJson(jsonUser, User.class);
+
+        user.addToCumulativeTime(time);
+
+        String moneyFormatted = String.valueOf(getFutuerSalary(user.getCumulativeTime())) + "원";
         moneyTextView.setText(moneyFormatted);
 
+        jsonUser = gson.toJson(user);
+        editor.putString(username, jsonUser);
+        editor.apply();
 
     }
+    private long getFutuerSalary(long userStudyTime) {
+        for (int i=0; i<6; i++) {
+            if (userStudyTime < studyTime[i]) {
+                return userStudyTime * futureSalary[i] / studyTime[i];
+            }
+        }
+        return userStudyTime;
+    }
+
+    //private static int[] studyTime = {0, 5600, 12500, 21900, 58400, 999999};
+    //private static int[] futureSalary = {0, 2831, 3471, 5434, 23070, 999999};
 }

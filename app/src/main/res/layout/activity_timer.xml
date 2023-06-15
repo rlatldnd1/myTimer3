@@ -10,17 +10,18 @@
         android:id="@+id/timerTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:layout_centerInParent="true"
+        android:layout_centerHorizontal="true"
         android:text="00:00"
-        android:textSize="48sp" />
+        android:textSize="80sp" />
+
     <TextView
         android:id="@+id/moneyTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:textSize="48sp"
-        android:text="0000원"
         android:layout_below="@id/timerTextView"
-        android:layout_centerInParent="true"/>
+        android:layout_centerInParent="true"
+        android:text="0000원"
+        android:textSize="40sp" />
 
     <Button
         android:id="@+id/startButton"

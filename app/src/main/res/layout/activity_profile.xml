@@ -7,28 +7,31 @@
     android:padding="16dp"
     tools:context=".ProfileActivity">
 
-    <TextView
-        android:id="@+id/usernameTextView"
+    <EditText
+        android:id="@+id/usernameEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:text="Username"
-        android:textSize="20sp" />
+        android:textSize="20sp"
+        android:enabled="false" />
 
-    <TextView
-        android:id="@+id/emailTextView"
+    <EditText
+        android:id="@+id/passwordEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Email"
+        android:text="password"
         android:textSize="20sp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:enabled="false" />
 
-    <TextView
-        android:id="@+id/ageTextView"
+    <EditText
+        android:id="@+id/cumulativeTimeEditText"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:text="Age"
+        android:text="cumulativeTime"
         android:textSize="20sp"
-        android:layout_marginTop="8dp" />
+        android:layout_marginTop="8dp"
+        android:enabled="false" />
 
     <Button
         android:id="@+id/editButton"

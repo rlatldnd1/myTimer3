@@ -10,6 +10,12 @@ public class User {
         this.password = password;
         this.cumulativeTime = 0;
     }
+    public User(String username, String password, long studyTime) {
+        this.username = username;
+        this.password = password;
+        this.cumulativeTime = studyTime;
+    }
+
 
     public String getUsername() {
         return username;
@@ -23,7 +29,7 @@ public class User {
         return cumulativeTime;
     }
 
-    public void addToCumulativeTime(long elapsedTime) {
-        cumulativeTime += elapsedTime;
+    public void addToCumulativeTime(long time) {
+        cumulativeTime += time;
     }
 }
