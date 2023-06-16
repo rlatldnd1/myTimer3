@@ -16,6 +16,8 @@ import com.google.gson.GsonBuilder;
 public class TimerActivity extends AppCompatActivity {
     private TextView timerTextView;
     private TextView moneyTextView;
+    private TextView cumulativeTimeTextView;
+    private TextView futureJobTextView;
     private Button startButton;
     private Button pauseButton;
     private Button resetButton;
@@ -48,12 +50,15 @@ public class TimerActivity extends AppCompatActivity {
 
         timerTextView = findViewById(R.id.timerTextView);
         moneyTextView = findViewById(R.id.moneyTextView);
+        cumulativeTimeTextView = findViewById(R.id.cumulativeTimeTextView);
+        futureJobTextView = findViewById(R.id.futureJobTextView);
         startButton = findViewById(R.id.startButton);
         pauseButton = findViewById(R.id.pauseButton);
         resetButton = findViewById(R.id.resetButton);
         profileButton = findViewById(R.id.profileButton);
 
         bufferTime = 0;
+        elapsedTime = 0;
         handler = new Handler();
 
         startButton.setOnClickListener(new View.OnClickListener() {
@@ -92,38 +97,54 @@ public class TimerActivity extends AppCompatActivity {
             startTime = System.currentTimeMillis();
 
             handler.postDelayed(timerRunnable, 0);
+            startButton.setEnabled(false);
             resetButton.setEnabled(false);
+            profileButton.setEnabled(false);
+
         }
     }
 
     private void pauseTimer() {
         if (isTimerRunning) {
             isTimerRunning = false;
-            bufferTime += System.currentTimeMillis() - startTime;
+            bufferTime = System.currentTimeMillis() - startTime;
+            elapsedTime += bufferTime;
+            cumulativeTime = getUpdateCumulTime(bufferTime);
+            String moneyFormatted;
+
+            long myFutureSalary = getFutuerSalary(cumulativeTime);
+            if (myFutureSalary > 10000) {
+                long hundredMillion = myFutureSalary / 10000;
+                moneyFormatted = "연봉 : " + String.valueOf(hundredMillion) + "억 " + String.valueOf(myFutureSalary % 10000) + "만원";
+            }
+            else {
+                moneyFormatted = "연봉 : " + String.valueOf(myFutureSalary % 10000) + "만원";
+            }
+            moneyTextView.setText(moneyFormatted);
+
+            String cumulTimeFormatted = "누적 공부 " + String.valueOf(cumulativeTime) + "시간";
+            cumulativeTimeTextView.setText(cumulTimeFormatted);
 
             handler.removeCallbacks(timerRunnable);
-            updateMoneyTextView(bufferTime);
+
+            startButton.setEnabled(true);
             resetButton.setEnabled(true);
+            profileButton.setEnabled(true);
         }
     }
 
     private void resetTimer() {
         isTimerRunning = false;
-        cumulativeTime += bufferTime;
         elapsedTime = 0;
         bufferTime = 0;
 
         handler.removeCallbacks(timerRunnable);
         updateTimerTextView(0);
-        updateMoneyTextView(0);
     }
 
     private void moveProfile() {
         Intent intent = new Intent(TimerActivity.this, ProfileActivity.class);
         intent.putExtra("username", username);
-        intent.putExtra("password", password);
-        intent.putExtra("cumulativeTime", cumulativeTime);
-
         startActivity(intent);
     }
 
@@ -131,10 +152,8 @@ public class TimerActivity extends AppCompatActivity {
         @Override
         public void run() {
             long currentTime = System.currentTimeMillis();
-            elapsedTime = currentTime - startTime;
 
-
-            updateTimerTextView(elapsedTime + bufferTime);
+            updateTimerTextView(elapsedTime + currentTime - startTime);
 
             handler.postDelayed(this, 1000); // Update every second
         }
@@ -148,7 +167,7 @@ public class TimerActivity extends AppCompatActivity {
         String timeFormatted = String.format("%02d:%02d", minutes, seconds);
         timerTextView.setText(timeFormatted);
     }
-    private void updateMoneyTextView(long time) {
+    private long getUpdateCumulTime(long time) {
 
         SharedPreferences preference = getSharedPreferences("UserInfo", MODE_PRIVATE);
         Gson gson = new GsonBuilder().create();
@@ -159,21 +178,34 @@ public class TimerActivity extends AppCompatActivity {
 
         user.addToCumulativeTime(time);
 
-        String moneyFormatted = String.valueOf(getFutuerSalary(user.getCumulativeTime())) + "원";
-        moneyTextView.setText(moneyFormatted);
 
         jsonUser = gson.toJson(user);
         editor.putString(username, jsonUser);
         editor.apply();
 
+        return user.getCumulativeTime();
     }
     private long getFutuerSalary(long userStudyTime) {
         for (int i=0; i<6; i++) {
             if (userStudyTime < studyTime[i]) {
-                return userStudyTime * futureSalary[i] / studyTime[i];
+                float studyTimePercent = (userStudyTime - studyTime[i - 1]) * 100 / (studyTime[i] - studyTime[i - 1]);
+
+                updateFutureJobText(i, studyTimePercent);
+                return (long)(futureSalary[i - 1] + studyTimePercent * (futureSalary[i] - futureSalary[i - 1]) / 100);
             }
         }
         return userStudyTime;
+    }
+    private void updateFutureJobText(int index, float percent) {
+
+        if (percent > 50) {
+            String futureJobFormatted = "당신은 상위 " + String.format("%.1f", 100 - percent) + "%의 " + futureJob[index - 1] + "입니다!";
+            futureJobTextView.setText(futureJobFormatted);
+        }
+        else {
+            String futureJobFormatted = "당신은 하위 " + String.format("%.1f", percent) + "%의 " + futureJob[index - 1] + "입니다!";
+            futureJobTextView.setText(futureJobFormatted);
+        }
     }
 
     //private static int[] studyTime = {0, 5600, 12500, 21900, 58400, 999999};

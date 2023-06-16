@@ -34,8 +34,9 @@ public class ProfileActivity extends AppCompatActivity {
 
         Intent intent = getIntent();
         username = intent.getStringExtra("username");
-        password = intent.getStringExtra("password");
-        cumulativeTime = intent.getLongExtra("cumulativeTime", 0);
+        User myUser = getUser(username);
+        password = myUser.getPassword();
+        cumulativeTime = myUser.getCumulativeTime();
 
 
         usernameText = findViewById(R.id.usernameEditText);
@@ -82,5 +83,13 @@ public class ProfileActivity extends AppCompatActivity {
         editor.putString(username, jsonUser);
         editor.apply();
 
+    }
+    private User getUser(String username) {
+        SharedPreferences preference = getSharedPreferences("UserInfo", MODE_PRIVATE);
+        Gson gson = new GsonBuilder().create();
+
+        String jsonUser = preference.getString(username, null);
+        User user = gson.fromJson(jsonUser, User.class);
+        return user;
     }
 }
